@@ -30,8 +30,8 @@ public:
 
   virtual bool intersect( const Ray& r , Hit& h , float tmin ) {
 		bool inter = false;
-		for (int i = 0; i < objects.size(); i++){
-			inter = objects[i].intersect(r, h, tmin);
+		for (unsigned i = 0; i < objects.size(); i++){
+			inter = objects[i]->intersect(r, h, tmin);
 		}
 		return inter;
    }

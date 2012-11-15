@@ -41,7 +41,7 @@ public:
 	}
 
 	virtual Ray generateRay( const Vector2f& point){
-		return Ray(this->center, (point.x * this->u + point.y*this->v + D * this->w).normalized());	
+		return Ray(this->center, (point.x() * this->u + point.y()*this->v + D * this->w).normalized());	
 	}
 
 	virtual float getTMin() const { 
