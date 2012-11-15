@@ -97,13 +97,6 @@ int main( int argc, char* argv[] )
 
 	//TODO: save to the name given in the command-line arguments
 	final.SaveImage("demo.bmp");
-  ///TODO: below demonstrates how to use the provided Image class
-  ///Should be removed when you start
-//  Vector3f pixelColor (1.0f,0,0);
-//  //width and height
-//  Image image( 10 , 15 );
-//  image.SetPixel( 5,5, pixelColor );
-//  image.SaveImage("demo.bmp");
   return 0;
 }
 
