@@ -11,10 +11,10 @@ class Camera
 {
 public:
 	//generate rays for each screen-space coordinate
-	virtual Ray generateRay( const Vector2f& point ) = 0 ; 
-	
+	virtual Ray generateRay( const Vector2f& point ) = 0 ;	
 	virtual float getTMin() const = 0 ; 
 	virtual ~Camera(){}
+	
 protected:
 //	Vector3f center; 
 //	Vector3f direction;
@@ -41,6 +41,8 @@ public:
 	}
 
 	virtual Ray generateRay( const Vector2f& point){
+		assert (point.x() >= -1.0 && point.x() <= 1.0);
+		assert (point.y() >= -1.0 && point.y() <= 1.0);
 		return Ray(this->center, (point.x() * this->u + point.y()*this->v + D * this->w).normalized());	
 	}
 

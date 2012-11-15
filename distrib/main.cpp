@@ -20,7 +20,8 @@ int main( int argc, char* argv[] )
   // Fill in your implementation here.
 	int size_x, size_y;
 	char* filename; 
-	
+	double aspect;	
+
   // This loop loops over each of the input arguments.
   // argNum is initialized to 1 because the first
   // "argument" provided to the program is actually the
@@ -28,20 +29,21 @@ int main( int argc, char* argv[] )
   for( int argNum = 1; argNum < argc; ++argNum )
     {
       std::cout << "Argument " << argNum << " is: " << argv[argNum] << std::endl;
-		if (strcmp(argv[argNum], "size") == 0){
+		if (strcmp(argv[argNum], "-size") == 0){
 			if (argNum + 2 < argc){
-				if (isdigit(atoi(argv[argNum + 1]))){
+				//TODO: check if number
+				//if (isnumber(atoi(argv[argNum + 1]))){
 					size_x = atoi(argv[argNum + 1]);
-				} else {
-					cout<<"size in x must be a number"<<endl;
-					return 0;
-				}
-				if (isdigit(atoi(argv[argNum + 2]))){
+				//} else {
+				//	cout<<"size in x must be a number"<<endl;
+				//	return 0;
+				//}
+				//if (isdigit(atoi(argv[argNum + 2]))){
 					size_y = atoi(argv[argNum + 2]);
-				} else {
-					cout<<"size in y must be a number"<<endl;
-					return 0;
-				}
+				//} else {
+				//	cout<<"size in y must be a number"<<endl;
+				//	return 0;
+				//}
 			} else {
 				cout<< "Not enough size arguments!"<<endl;
 				return 0;
@@ -56,6 +58,7 @@ int main( int argc, char* argv[] )
 		}
     }
 	
+	aspect = size_x / size_y;
     
   // First, parse the scene using SceneParser.
   // Then loop over each pixel in the image, shooting a ray
@@ -63,17 +66,40 @@ int main( int argc, char* argv[] )
   // the scene.  Write the color at the intersection to that
   // pixel in your output image.
 
-	SceneParser parser = SceneParser(filename);
-		
+	SceneParser parser(filename);
+	Image final(size_x, size_y);
+	int numintersect = 0;
+	float step_x = 2.0f / float(size_x);
+	float step_y = 2.0f / float(size_y);
+	//TODO: add aspect ratio
+	//TODO: use scene background color when there is no hit
+	cout<<parser.getGroup()->getGroupSize()<<endl;
+	for (int i = 0; i < size_x; i++){
+		for (int j = 0; j < size_y; j++){
+			Ray r = parser.getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, float(j) * step_y - 1.0f)));
+			//cout<<"ray = "<<r <<endl;	
+			Hit h;
+			bool intersect = parser.getGroup()->intersect(r, h, 0); 
+			if (intersect){
+				final.SetPixel(i, j, Vector3f(1.0f, 0, 0));
+				numintersect++;	
+			} else {
+				final.SetPixel(i, j, Vector3f(0, 1.0f, 0));
+			}
+		}
+	}	
 
- 
+	cout<<"numint = "<<numintersect<<endl;
+
+	//TODO: save to the name given in the command-line arguments
+	final.SaveImage("demo.bmp");
   ///TODO: below demonstrates how to use the provided Image class
   ///Should be removed when you start
-  Vector3f pixelColor (1.0f,0,0);
-  //width and height
-  Image image( 10 , 15 );
-  image.SetPixel( 5,5, pixelColor );
-  image.SaveImage("demo.bmp");
+//  Vector3f pixelColor (1.0f,0,0);
+//  //width and height
+//  Image image( 10 , 15 );
+//  image.SetPixel( 5,5, pixelColor );
+//  image.SaveImage("demo.bmp");
   return 0;
 }
 
