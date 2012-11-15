@@ -80,7 +80,15 @@ int main( int argc, char* argv[] )
 			Hit h;
 			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
 			if (intersect){
-				final.SetPixel(i, j, h.getMaterial()->getDiffuseColor());
+				Vector3f dir;
+				Vector3f col;
+				Vector3f pixelval(0, 0, 0);
+				for (int k = 0; k < parser.getNumLights(); k++){
+					float disttolight = h.getT();
+					parser.getLight(k)->getIllumination(h.getT()*r.getDirection(), dir, col, disttolight);
+					pixelval += h.getMaterial()->Shade(r, h, dir, col);
+				}
+				final.SetPixel(i, j, pixelval);
 			} else {
 				final.SetPixel(i, j, parser.getBackgroundColor());
 			}
