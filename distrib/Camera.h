@@ -33,7 +33,7 @@ class PerspectiveCamera: public Camera
 public:
 	PerspectiveCamera(const Vector3f& center, const Vector3f& direction,const Vector3f& up , float angle){
 		this->center = center;
-		this->w = direction;
+		this->w = direction.normalized();
 		this->u = (Vector3f::cross(this->w, up)).normalized();
 		this->v = (Vector3f::cross(this->u, this->w)).normalized();
 		this->angle = angle;

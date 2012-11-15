@@ -33,7 +33,7 @@ public:
 		A_t.setCol(2, col);
 		float t = A_t.determinant() / detA;
 		if (t >= tmin && t < hit.getT() && beta + gamma <= 1.0 && beta >= 0 && gamma >= 0){
-			hit.set(t, this->material, alpha *normals[0] + beta *normals[1] + gamma * normals[2]);
+			hit.set(t, this->material, ((1 - beta - gamma) *normals[0] + beta *normals[1] + gamma * normals[2]).normalized());
 			return true;
 		}	
 		return false;
