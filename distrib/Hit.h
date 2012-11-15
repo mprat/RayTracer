@@ -62,6 +62,10 @@ public:
         material = m;
         normal = n;
     }
+	void setNormal(const Vector3f& n)
+	{
+		normal = n;
+	}
 	void setTexCoord(const Vector2f & coord){
 		texCoord = coord;
 		hasTex = true;
