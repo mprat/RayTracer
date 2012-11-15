@@ -7,8 +7,7 @@
 #include "Ray.h"
 #include "Hit.h"
 #include "texture.hpp"
-///TODO:
-///Implement Shade function that uses ambient, diffuse, specular and texture
+
 class Material
 {
 public:
@@ -49,7 +48,5 @@ public:
   float shininess;
   Texture t;
 };
-
-
 
 #endif // MATERIAL_H
