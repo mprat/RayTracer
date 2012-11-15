@@ -88,7 +88,7 @@ int main( int argc, char* argv[] )
 					parser.getLight(k)->getIllumination(h.getT()*r.getDirection(), dir, col, disttolight);
 					pixelval += h.getMaterial()->Shade(r, h, dir, col);
 				}
-				final.SetPixel(i, j, pixelval);
+				final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
 			} else {
 				final.SetPixel(i, j, parser.getBackgroundColor());
 			}
