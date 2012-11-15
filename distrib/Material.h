@@ -34,7 +34,9 @@ public:
                   const Vector3f& dirToLight, const Vector3f& lightColor ) {
 
     float d = max(0.0f, Vector3f::dot(dirToLight, hit.getNormal()));
-	return d * diffuseColor * lightColor;
+	Vector3f R = ray.getDirection() - 2.0 * Vector3f::dot(ray.getDirection(), hit.getNormal()) * hit.getNormal();
+	float c_s = max(0.0f, Vector3f::dot(dirToLight, R));
+	return d * diffuseColor * lightColor + pow(c_s, shininess) * lightColor * specularColor;
 		
   }
 
