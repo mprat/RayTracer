@@ -22,7 +22,8 @@ public:
 	
   Group( int num_objects ){
 	this->num_obj = num_objects;
-  }
+	this->objects.resize(num_objects);
+	}
 
   ~Group(){
    
@@ -30,15 +31,16 @@ public:
 
   virtual bool intersect( const Ray& r , Hit& h , float tmin ) {
 		bool inter = false;
-		for (unsigned i = 0; i < objects.size(); i++){
-			inter = objects[i]->intersect(r, h, tmin);
+		for (unsigned i = 0; i < this->objects.size(); i++){
+			bool intereach = this->objects[i]->intersect(r, h, tmin);
+			if (intereach) inter = true;
 		}
 		return inter;
    }
 	
   void addObject( int index , Object3D* obj ){
-	objects.push_back(obj);
-  }
+	this->objects[index] = obj;
+	}
 
   int getGroupSize(){ 
 	return num_obj;

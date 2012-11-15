@@ -68,7 +68,6 @@ int main( int argc, char* argv[] )
 
 	SceneParser parser(filename);
 	Image final(size_x, size_y);
-	int numintersect = 0;
 	float step_x = 2.0f / float(size_x);
 	float step_y = 2.0f / float(size_y);
 	//TODO: add aspect ratio
@@ -79,17 +78,14 @@ int main( int argc, char* argv[] )
 			Ray r = parser.getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, float(j) * step_y - 1.0f)));
 			//cout<<"ray = "<<r <<endl;	
 			Hit h;
-			bool intersect = parser.getGroup()->intersect(r, h, 0); 
+			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
 			if (intersect){
-				final.SetPixel(i, j, Vector3f(1.0f, 0, 0));
-				numintersect++;	
+				final.SetPixel(i, j, h.getMaterial()->getDiffuseColor());
 			} else {
-				final.SetPixel(i, j, Vector3f(0, 1.0f, 0));
+				final.SetPixel(i, j, parser.getBackgroundColor());
 			}
 		}
 	}	
-
-	cout<<"numint = "<<numintersect<<endl;
 
 	//TODO: save to the name given in the command-line arguments
 	final.SaveImage("demo.bmp");
