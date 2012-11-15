@@ -46,7 +46,7 @@ int main( int argc, char* argv[] )
 				cout<< "Not enough size arguments!"<<endl;
 				return 0;
 			}
-		} else if (strcmp(argv[argNum], "-input")){
+		} else if (strcmp(argv[argNum], "-input") == 0){
 			if (argNum + 1 < argc){
 				filename = argv[argNum + 1];
 			} else {
