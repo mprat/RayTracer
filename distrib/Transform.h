@@ -20,7 +20,7 @@ public:
     Ray trans_r(VecUtils::transformPoint(transform.inverse(), r.getOrigin()), VecUtils::transformDirection(transform.inverse(), r.getDirection()));
 	bool inter = o->intersect( trans_r , h , tmin);
 	if (inter) {
-		h.setNormal(transform.getSubmatrix3x3(0, 0).inverse().transposed() * h.getNormal());
+		h.setNormal((transform.getSubmatrix3x3(0, 0).inverse().transposed() * h.getNormal()).normalized());
 	}
   }
 
