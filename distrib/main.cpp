@@ -20,6 +20,7 @@ int main( int argc, char* argv[] )
   // Fill in your implementation here.
 	int size_x, size_y;
 	char* filename; 
+	char* outputfilename;
 	double aspect;	
 
   // This loop loops over each of the input arguments.
@@ -55,6 +56,13 @@ int main( int argc, char* argv[] )
 				cout<<"not enough filename arguments"<<endl;
 				return 0;
 			}
+		} else if (strcmp(argv[argNum], "-output") == 0){
+			if (argNum + 1 < argc){
+				outputfilename = argv[argNum + 1];
+			} else {
+				cout<<"not enough output filename arguments"<<endl;
+				return 0;
+			}
 		}
     }
 	
@@ -71,11 +79,10 @@ int main( int argc, char* argv[] )
 	float step_x = 2.0f / float(size_x);
 	float step_y = 2.0f / float(size_y);
 	//TODO: add aspect ratio
-	//TODO: use scene background color when there is no hit
 	cout<<parser.getGroup()->getGroupSize()<<endl;
 	for (int i = 0; i < size_x; i++){
 		for (int j = 0; j < size_y; j++){
-			Ray r = parser.getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, float(j) * step_y - 1.0f)));
+			Ray r = parser.getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
 			//cout<<"ray = "<<r <<endl;	
 			Hit h;
 			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
@@ -95,8 +102,7 @@ int main( int argc, char* argv[] )
 		}
 	}	
 
-	//TODO: save to the name given in the command-line arguments
-	final.SaveImage("demo.bmp");
+	final.SaveImage(outputfilename);
   return 0;
 }
 
