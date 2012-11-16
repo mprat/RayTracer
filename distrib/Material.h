@@ -35,13 +35,20 @@ public:
     float d = max(0.0f, Vector3f::dot(dirToLight, hit.getNormal()));
 	Vector3f R = ray.getDirection() - 2.0 * Vector3f::dot(ray.getDirection(), hit.getNormal()) * hit.getNormal();
 	float c_s = max(0.0f, Vector3f::dot(dirToLight, R));
-	return d * diffuseColor * lightColor + pow(c_s, shininess) * lightColor * specularColor;
-		
+	if (t.valid()){
+		return d * diffuseColor * t(hit.texCoord.x(), hit.texCoord.y()) + pow(c_s, shininess) * lightColor * specularColor; 	
+	} else {
+		return d * diffuseColor * lightColor + pow(c_s, shininess) * lightColor * specularColor;
+	}	
   }
 
   void loadTexture(const char * filename){
     t.load(filename);
   }
+	
+  bool validTexture(){
+		return t.valid();
+	}
  protected:
   Vector3f diffuseColor;
   Vector3f specularColor;
