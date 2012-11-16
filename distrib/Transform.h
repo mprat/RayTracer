@@ -22,6 +22,7 @@ public:
 	if (inter) {
 		h.setNormal((transform.getSubmatrix3x3(0, 0).inverse().transposed() * h.getNormal()).normalized());
 	}
+	return inter;
   }
 
  protected:

@@ -45,6 +45,10 @@ public:
   void loadTexture(const char * filename){
     t.load(filename);
   }
+
+	Vector3f returnTexture(const Hit& hit){
+		return t(hit.texCoord.x(), hit.texCoord.y());
+	}
 	
   bool validTexture(){
 		return t.valid();

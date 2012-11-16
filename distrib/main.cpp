@@ -18,10 +18,10 @@ float clampedDepth ( float depthInput, float depthMin , float depthMax);
 int main( int argc, char* argv[] )
 {
   // Fill in your implementation here.
-	int size_x, size_y;
-	char* filename; 
-	char* outputfilename;
-	double aspect;	
+	int size_x = 0, size_y = 0;
+	char* filename = ""; 
+	char* outputfilename = "";
+	//double aspect = 0.0;	
 
   // This loop loops over each of the input arguments.
   // argNum is initialized to 1 because the first
@@ -66,7 +66,7 @@ int main( int argc, char* argv[] )
 		}
     }
 	
-	aspect = size_x / size_y;
+	//aspect = size_x / size_y;
     
   // First, parse the scene using SceneParser.
   // Then loop over each pixel in the image, shooting a ray
@@ -95,7 +95,11 @@ int main( int argc, char* argv[] )
 					parser.getLight(k)->getIllumination(h.getT()*r.getDirection(), dir, col, disttolight);
 					pixelval += h.getMaterial()->Shade(r, h, dir, col);
 				}
-				final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
+				if (h.getMaterial()->validTexture()) {
+					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->returnTexture(h) + pixelval);
+				} else {
+					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
+				}
 			} else {
 				final.SetPixel(i, j, parser.getBackgroundColor());
 			}
