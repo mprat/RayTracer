@@ -36,7 +36,7 @@ public:
 	Vector3f R = ray.getDirection() - 2.0 * Vector3f::dot(ray.getDirection(), hit.getNormal()) * hit.getNormal();
 	float c_s = max(0.0f, Vector3f::dot(dirToLight, R));
 	if (t.valid()){
-		return d * diffuseColor * t(hit.texCoord.x(), hit.texCoord.y()) + pow(c_s, shininess) * lightColor * specularColor; 	
+		return d * lightColor * t(hit.texCoord.x(), hit.texCoord.y()) + pow(c_s, shininess) * lightColor * specularColor; 	
 	} else {
 		return d * diffuseColor * lightColor + pow(c_s, shininess) * lightColor * specularColor;
 	}	
