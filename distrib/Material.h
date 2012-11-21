@@ -29,6 +29,8 @@ public:
 	float getRefractionIndex();
 	Vector3f getDiffuseColor();
 	Vector3f getSpecularColor();
+	bool validTexture();
+	Vector3f returnTexture(const Hit& hit);
 
 	void setNoise(const Noise & n);
 protected:

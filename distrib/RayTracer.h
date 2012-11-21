@@ -27,7 +27,7 @@ public:
                      float refr_index, Hit& hit ) const;
 private:
   SceneParser* m_scene;
-
+	Group *g;
   int m_maxBounces;
 
 };

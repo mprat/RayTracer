@@ -101,7 +101,7 @@ int main( int argc, char* argv[] )
 					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
 				}
 			} else {
-				final.SetPixel(i, j, parser.getBackgroundColor());
+				final.SetPixel(i, j, parser.getBackgroundColor(r.getDirection()));
 			}
 		}
 	}	

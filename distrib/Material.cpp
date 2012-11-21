@@ -43,6 +43,15 @@ float Material::clampedDot( const Vector3f& L , const Vector3f& N )const {
 void Material::loadTexture(const char * filename){
 	t.load(filename);
 }
+
+bool Material::validTexture(){
+	return t.valid();
+}
+
+Vector3f Material::returnTexture(const Hit& hit){
+	return t(hit.texCoord.x(), hit.texCoord.y());
+}
+
 float Material::getRefractionIndex(){
 	return refractionIndex;
 }
