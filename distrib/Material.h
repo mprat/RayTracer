@@ -7,57 +7,37 @@
 #include "Ray.h"
 #include "Hit.h"
 #include "texture.hpp"
-
+#include "Noise.h"
 class Material
 {
 public:
 	
- Material( const Vector3f& d_color ,const Vector3f& s_color=Vector3f::ZERO, float s=0):
-  diffuseColor( d_color),specularColor(s_color), shininess(s)
-  {
-        	
-  }
+	Material( const Vector3f& d_color ,const Vector3f& s_color=Vector3f::ZERO, float s=0,
+		float r =0 );
 
-  virtual ~Material()
-    {
+    virtual ~Material();
 
-    }
+    virtual Vector3f getDiffuseColor() const ;
 
-  virtual Vector3f getDiffuseColor() const 
-  { 
-    return  diffuseColor;
-  }
-    
+    Vector3f Shade( const Ray& ray, const Hit& hit,
+            const Vector3f& dirToLight, const Vector3f& lightColor ) ;
 
-  Vector3f Shade( const Ray& ray, const Hit& hit,
-                  const Vector3f& dirToLight, const Vector3f& lightColor ) {
+	static  Vector3f pointwiseDot( const Vector3f& v1 , const Vector3f& v2 );
 
-    float d = max(0.0f, Vector3f::dot(dirToLight, hit.getNormal()));
-	Vector3f R = ray.getDirection() - 2.0 * Vector3f::dot(ray.getDirection(), hit.getNormal()) * hit.getNormal();
-	float c_s = max(0.0f, Vector3f::dot(dirToLight, R));
-	if (t.valid()){
-		return d * lightColor * t(hit.texCoord.x(), hit.texCoord.y()) + pow(c_s, shininess) * lightColor * specularColor; 	
-	} else {
-		return d * diffuseColor * lightColor + pow(c_s, shininess) * lightColor * specularColor;
-	}	
-  }
+	float clampedDot( const Vector3f& L , const Vector3f& N )const;
+	void loadTexture(const char * filename);
+	float getRefractionIndex();
+	Vector3f getDiffuseColor();
+	Vector3f getSpecularColor();
 
-  void loadTexture(const char * filename){
-    t.load(filename);
-  }
-
-	Vector3f returnTexture(const Hit& hit){
-		return t(hit.texCoord.x(), hit.texCoord.y());
-	}
-	
-  bool validTexture(){
-		return t.valid();
-	}
- protected:
+	void setNoise(const Noise & n);
+protected:
   Vector3f diffuseColor;
-  Vector3f specularColor;
+  float refractionIndex;
   float shininess;
+  Vector3f specularColor;
   Texture t;
+  Noise noise;
 };
 
 #endif // MATERIAL_H
