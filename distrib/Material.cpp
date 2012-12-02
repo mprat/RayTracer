@@ -15,20 +15,20 @@ Vector3f Material::getDiffuseColor() const
 Vector3f Material::Shade( const Ray& ray, const Hit& hit,
 	const Vector3f& dirToLight, const Vector3f& lightColor ) {
     Vector3f kd;
-		if(t.valid() && hit.hasTex){
-			Vector2f texCoord = hit.texCoord;
-			Vector3f texColor = t(texCoord[0],texCoord[1]);
-			kd = texColor;
-		}else{
+	if(t.valid() && hit.hasTex){
+		Vector2f texCoord = hit.texCoord;
+		Vector3f texColor = t(texCoord[0],texCoord[1]);
+		kd = texColor;
+	}else{
       kd = this->diffuseColor;
     }
-		Vector3f n = hit.getNormal().normalized();
-		//Diffuse Shading
-		if(noise.valid()){
-			kd = noise.getColor(ray.getOrigin()+ray.getDirection()*hit.getT());
-		}
-		Vector3f color = clampedDot( dirToLight ,n )*pointwiseDot( lightColor , kd);
-		return color;
+	Vector3f n = hit.getNormal().normalized();
+	//Diffuse Shading
+	if(noise.valid()){
+		kd = noise.getColor(ray.getOrigin()+ray.getDirection()*hit.getT());
+	}
+	Vector3f color = clampedDot( dirToLight ,n )*pointwiseDot( lightColor , kd);
+	return color;
 }
 
 Vector3f Material::pointwiseDot( const Vector3f& v1 , const Vector3f& v2 ) {

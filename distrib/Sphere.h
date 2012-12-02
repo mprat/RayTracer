@@ -29,8 +29,8 @@ public:
 		double c = (r.getOrigin() - this->center).absSquared() - this->radius * this->radius; 
 		double disc = b * b - 4 * a * c;
 //		cout<<"ALL a = "<<a<<" b = "<<b<<" c = "<<c<<" disc = "<<disc<<endl;
-		double t0 = 0, t1 = 0;
-		double t;
+		float t0 = 0, t1 = 0;
+		float t;
 		if (disc < 0) return false;
 		else if (disc == 0){
 			t0 = t1 = -0.5 * b / a;
@@ -43,8 +43,8 @@ public:
 		t = min(t0, t1);
 		if (t < 0) t = max(t0, t1);
 		if (t < 0) return false;
-		if ((float)(t) >= tmin && (float)(t) < h.getT()){
-			h.set((float)(t), this->material, (t*r.getDirection() + r.getOrigin() - this->center).normalized());
+		if (t >= tmin && t < h.getT()){
+			h.set(t, this->material, (t*r.getDirection() + r.getOrigin() - this->center).normalized());
 //			h.set((float)(t), this->material, h.getNormal());
 //			cout<<"INSERSECT a = "<<a<<" b = "<<b<<" c = "<<c<<" disc = "<<disc<<" t = "<<t<<endl;
 			return true;

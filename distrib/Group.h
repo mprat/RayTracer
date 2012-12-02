@@ -34,6 +34,8 @@ public:
 		}
 		return inter;
    }
+
+
 	
   void addObject( int index , Object3D* obj ){
 	this->objects[index] = obj;
@@ -42,6 +44,10 @@ public:
   int getGroupSize(){ 
 	return num_obj;
   }
+
+	Object3D* getObject(int index){
+		return this->objects[index];
+	}
 
  private:
 	vector<Object3D*> objects;

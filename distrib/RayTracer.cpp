@@ -48,9 +48,18 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 			finalColor = m_scene->getAmbientLight() * hit.getMaterial()->getDiffuseColor();
 		}
 		for (int k = 0; k < m_scene->getNumLights(); k++){
-			float disttolight = hit.getT();
-			m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
-			finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
+			float disttolight = hit.getT();	
+			Vector3f hitPt = ray.pointAtParameter(disttolight);
+			Ray ray2(hitPt, m_scene->getLight(k)->directionToLight(hitPt));
+			Hit hit2(disttolight, NULL, NULL);
+			for (int objIndex = 0; objIndex < g->getGroupSize(); objIndex++){
+				g->getObject(objIndex)->intersect(ray2, hit2, EPSILON); 
+			}
+			if (hit2.getT() == disttolight){
+				//cout<<"hit2t = "<<hit2.getT()<<"  disttolight = "<<disttolight<<endl;
+				m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
+				finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
+			}
 		}
 	} else {
 		finalColor = m_scene->getBackgroundColor(ray.getDirection());

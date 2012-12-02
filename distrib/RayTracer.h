@@ -26,9 +26,9 @@ public:
   Vector3f traceRay( Ray& ray, float tmin, int bounces, 
                      float refr_index, Hit& hit ) const;
 private:
-  SceneParser* m_scene;
+	SceneParser* m_scene;
 	Group *g;
-  int m_maxBounces;
+	int m_maxBounces;
 
 };
 
