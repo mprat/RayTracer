@@ -37,7 +37,25 @@ RayTracer::~RayTracer()
 Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
         float refr_index, Hit& hit ) const
 {
-    hit = Hit( FLT_MAX, NULL, Vector3f( 0, 0, 0 ) );
+	Vector3f finalColor(0, 0, 0);
+	bool intersect = g->intersect(ray, hit, tmin); 
+	if (intersect){
+		Vector3f dir;
+		Vector3f col;
+		if (hit.getMaterial()->validTexture()) {
+			finalColor = m_scene->getAmbientLight() * hit.getMaterial()->returnTexture(hit);
+		} else {
+			finalColor = m_scene->getAmbientLight() * hit.getMaterial()->getDiffuseColor();
+		}
+		for (int k = 0; k < m_scene->getNumLights(); k++){
+			float disttolight = hit.getT();
+			m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
+			finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
+		}
+	} else {
+		finalColor = m_scene->getBackgroundColor(ray.getDirection());
+	}
 
-    return Vector3f(0,0,0);
+
+    return finalColor;
 }

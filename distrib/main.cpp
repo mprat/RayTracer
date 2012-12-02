@@ -9,6 +9,7 @@
 #include "Image.h"
 #include "Camera.h"
 #include <string.h>
+#include "RayTracer.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ int main( int argc, char* argv[] )
 	int size_x = 0, size_y = 0;
 	char* filename = ""; 
 	char* outputfilename = "";
+	int max_bounces = 0;
 	//double aspect = 0.0;	
 
   // This loop loops over each of the input arguments.
@@ -63,6 +65,13 @@ int main( int argc, char* argv[] )
 				cout<<"not enough output filename arguments"<<endl;
 				return 0;
 			}
+		} else if (strcmp(argv[argNum], "-bounces") == 0){
+			if (argNum + 1 < argc){
+				max_bounces = atoi(argv[argNum + 1]);
+			} else {
+				cout<<"not enough bounce arguments"<<endl;
+				return 0;
+			}
 		}
     }
 	
@@ -74,35 +83,40 @@ int main( int argc, char* argv[] )
   // the scene.  Write the color at the intersection to that
   // pixel in your output image.
 
-	SceneParser parser(filename);
+	SceneParser *parser = new SceneParser(filename);
 	Image final(size_x, size_y);
+	RayTracer raytracer(parser, max_bounces);
 	float step_x = 2.0f / float(size_x);
 	float step_y = 2.0f / float(size_y);
 	//TODO: add aspect ratio
-	cout<<parser.getGroup()->getGroupSize()<<endl;
+	cout<<parser->getGroup()->getGroupSize()<<endl;
 	for (int i = 0; i < size_x; i++){
 		for (int j = 0; j < size_y; j++){
-			Ray r = parser.getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
+			Ray r = parser->getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
 			//cout<<"ray = "<<r <<endl;	
 			Hit h;
-			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
-			if (intersect){
-				Vector3f dir;
-				Vector3f col;
-				Vector3f pixelval(0, 0, 0);
-				for (int k = 0; k < parser.getNumLights(); k++){
-					float disttolight = h.getT();
-					parser.getLight(k)->getIllumination(h.getT()*r.getDirection(), dir, col, disttolight);
-					pixelval += h.getMaterial()->Shade(r, h, dir, col);
-				}
-				if (h.getMaterial()->validTexture()) {
-					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->returnTexture(h) + pixelval);
-				} else {
-					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
-				}
-			} else {
-				final.SetPixel(i, j, parser.getBackgroundColor(r.getDirection()));
-			}
+			//TODO: add in refractive index
+			Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 0, h);  
+//			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
+//			if (intersect){
+//				Vector3f dir;
+//				Vector3f col;
+//				Vector3f pixelval(0, 0, 0);
+//				for (int k = 0; k < parser.getNumLights(); k++){
+//					float disttolight = h.getT();
+//					parser.getLight(k)->getIllumination(h.getT()*r.getDirection(), dir, col, disttolight);
+//					pixelval += h.getMaterial()->Shade(r, h, dir, col);
+//				}
+//				if (h.getMaterial()->validTexture()) {
+//					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->returnTexture(h) + pixelval);
+//				} else {
+//					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
+//				}
+//			} else {
+//				final.SetPixel(i, j, parser.getBackgroundColor(r.getDirection()));
+//			}
+			final.SetPixel(i, j, color);
+			
 		}
 	}	
 
