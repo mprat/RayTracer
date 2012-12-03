@@ -60,7 +60,7 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 					//endcastshadow ray
 					if (hitShadow.getT() == disttolight){
 						//cout<<"hit2t = "<<hit2.getT()<<"  disttolight = "<<disttolight<<endl;
-						m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
+						m_scene->getLight(k)->getIllumination(ray.pointAtParameter(hit.getT()), dir, col, disttolight);
 						finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
 					}
 				} else {
@@ -71,12 +71,12 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 			}
 			
 			//mirror reflection
-			if (hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
+			if (bounces > 0 && hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
 			{
 				Vector3f mirrorDir = mirrorDirection(hit.getNormal(), ray.getDirection());
 				Ray mirrorRay(hitPt, mirrorDir);
 				Hit h;
-				finalColor += hit.getMaterial()->getSpecularColor() * traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h);
+				finalColor += traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h) * h.getMaterial()->getSpecularColor();
 			}
 
 			//TODO: transparent
