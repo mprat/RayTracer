@@ -8,10 +8,9 @@
 
 #define EPSILON 0.001
 
-//IMPLEMENT THESE FUNCTIONS
-//These function definitions are mere suggestions. Change them as you like.
 Vector3f mirrorDirection( const Vector3f& normal, const Vector3f& incoming)
 {
+	return incoming - 2*Material::pointwiseDot(incoming, normal) * normal;
 }
 
 bool transmittedDirection( const Vector3f& normal, const Vector3f& incoming, 
@@ -20,14 +19,13 @@ bool transmittedDirection( const Vector3f& normal, const Vector3f& incoming,
 {
 }
 
-RayTracer::RayTracer( SceneParser * scene, int max_bounces 
-  //more arguments if you need...
-                      ) :
+RayTracer::RayTracer( SceneParser * scene, int max_bounces, bool shadows) :
   m_scene(scene)
 
 {
   g=scene->getGroup();
   m_maxBounces = max_bounces;
+  m_shadows = shadows;
 }
 
 RayTracer::~RayTracer()
@@ -35,36 +33,60 @@ RayTracer::~RayTracer()
 }
 
 Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
-        float refr_index, Hit& hit ) const
+        float refr_index, Hit& hit) 
 {
-	Vector3f finalColor(0, 0, 0);
-	bool intersect = g->intersect(ray, hit, tmin); 
-	if (intersect){
-		Vector3f dir;
-		Vector3f col;
-		if (hit.getMaterial()->validTexture()) {
-			finalColor = m_scene->getAmbientLight() * hit.getMaterial()->returnTexture(hit);
+	if (bounces >= 0){
+		Vector3f finalColor(0, 0, 0);
+		bool intersect = g->intersect(ray, hit, tmin); 
+		if (intersect){
+			Vector3f dir;
+			Vector3f col;
+			if (hit.getMaterial()->validTexture()) {
+				finalColor = m_scene->getAmbientLight() * hit.getMaterial()->returnTexture(hit);
+			} else {
+				finalColor = m_scene->getAmbientLight() * hit.getMaterial()->getDiffuseColor();
+			}
+			
+			Vector3f hitPt = ray.pointAtParameter(hit.getT());
+			for (int k = 0; k < m_scene->getNumLights(); k++){
+				float disttolight = m_scene->getLight(k)->distanceToLight(hitPt);	
+				if (m_shadows){
+					//cast shadow ray
+					Hit hitShadow(disttolight, NULL, NULL);
+					Ray rayShadow(hitPt, m_scene->getLight(k)->directionToLight(hitPt));
+					for (int objIndex = 0; objIndex < g->getGroupSize(); objIndex++){
+						g->getObject(objIndex)->intersect(rayShadow, hitShadow, EPSILON); 
+					}
+					//endcastshadow ray
+					if (hitShadow.getT() == disttolight){
+						//cout<<"hit2t = "<<hit2.getT()<<"  disttolight = "<<disttolight<<endl;
+						m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
+						finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
+					}
+				} else {
+					m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
+					finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
+				}
+
+			}
+			
+			//mirror reflection
+			if (hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
+			{
+				Vector3f mirrorDir = mirrorDirection(hit.getNormal(), ray.getDirection());
+				Ray mirrorRay(hitPt, mirrorDir);
+				Hit h;
+				finalColor += hit.getMaterial()->getSpecularColor() * traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h);
+			}
+
+			//TODO: transparent
 		} else {
-			finalColor = m_scene->getAmbientLight() * hit.getMaterial()->getDiffuseColor();
+			finalColor = m_scene->getBackgroundColor(ray.getDirection());
 		}
-		for (int k = 0; k < m_scene->getNumLights(); k++){
-			float disttolight = hit.getT();	
-			Vector3f hitPt = ray.pointAtParameter(disttolight);
-			Ray ray2(hitPt, m_scene->getLight(k)->directionToLight(hitPt));
-			Hit hit2(disttolight, NULL, NULL);
-			for (int objIndex = 0; objIndex < g->getGroupSize(); objIndex++){
-				g->getObject(objIndex)->intersect(ray2, hit2, EPSILON); 
-			}
-			if (hit2.getT() == disttolight){
-				//cout<<"hit2t = "<<hit2.getT()<<"  disttolight = "<<disttolight<<endl;
-				m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
-				finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
-			}
-		}
+
+		return finalColor;
 	} else {
-		finalColor = m_scene->getBackgroundColor(ray.getDirection());
+		return Vector3f(0, 0, 0); 
 	}
-
-
-    return finalColor;
 }
+

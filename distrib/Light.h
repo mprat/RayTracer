@@ -21,6 +21,7 @@ public:
 
     virtual void getIllumination( const Vector3f& p, Vector3f& dir, Vector3f& col, float& distanceToLight ) const = 0;
 	virtual Vector3f directionToLight(const Vector3f& pt) = 0;
+	virtual float distanceToLight(const Vector3f& pt) = 0; 
 
 };
 
@@ -51,7 +52,12 @@ public:
 	
 	Vector3f directionToLight(const Vector3f& pt)
 	{
-		return -direction;
+		return -direction.normalized();
+	}
+
+	float distanceToLight(const Vector3f& pt)
+	{
+		return FLT_MAX;
 	}
 
 private:
@@ -91,8 +97,12 @@ public:
 
 	Vector3f directionToLight(const Vector3f& pt)
 	{
-		Vector3f ptdir = position - pt;
-		return ptdir/ptdir.abs();
+		return (position - pt).normalized();
+	}
+	
+	float distanceToLight(const Vector3f& pt)
+	{
+		return (position - pt).abs();
 	}
 
 private:

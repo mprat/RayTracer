@@ -19,17 +19,18 @@ public:
       assert( false );
   }
 
-  RayTracer( SceneParser* scene, int max_bounces //more arguments as you need...
-  );
+  RayTracer( SceneParser* scene, int max_bounces, bool shadows);
   ~RayTracer();
   
   Vector3f traceRay( Ray& ray, float tmin, int bounces, 
-                     float refr_index, Hit& hit ) const;
+                     float refr_index, Hit& hit) ;	
+
 private:
 	SceneParser* m_scene;
 	Group *g;
 	int m_maxBounces;
-
+	bool m_shadows;
+	
 };
 
 #endif // RAY_TRACER_H

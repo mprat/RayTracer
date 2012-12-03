@@ -23,6 +23,7 @@ int main( int argc, char* argv[] )
 	char* filename = ""; 
 	char* outputfilename = "";
 	int max_bounces = 0;
+	bool shadows = false;
 	//double aspect = 0.0;	
 
   // This loop loops over each of the input arguments.
@@ -72,6 +73,8 @@ int main( int argc, char* argv[] )
 				cout<<"not enough bounce arguments"<<endl;
 				return 0;
 			}
+		} else if (strcmp(argv[argNum], "-shadows") == 0){
+			shadows = true;
 		}
     }
 	
@@ -85,7 +88,7 @@ int main( int argc, char* argv[] )
 
 	SceneParser *parser = new SceneParser(filename);
 	Image final(size_x, size_y);
-	RayTracer raytracer(parser, max_bounces);
+	RayTracer raytracer(parser, max_bounces, shadows);
 	float step_x = 2.0f / float(size_x);
 	float step_y = 2.0f / float(size_y);
 	//TODO: add aspect ratio
