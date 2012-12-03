@@ -49,7 +49,8 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 			
 			Vector3f hitPt = ray.pointAtParameter(hit.getT());
 			for (int k = 0; k < m_scene->getNumLights(); k++){
-				float disttolight = m_scene->getLight(k)->distanceToLight(hitPt);	
+				float disttolight;	
+				m_scene->getLight(k)->getIllumination(ray.pointAtParameter(hit.getT()), dir, col, disttolight);
 				if (m_shadows){
 					//cast shadow ray
 					Hit hitShadow(disttolight, NULL, NULL);
@@ -60,11 +61,9 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 					//endcastshadow ray
 					if (hitShadow.getT() == disttolight){
 						//cout<<"hit2t = "<<hit2.getT()<<"  disttolight = "<<disttolight<<endl;
-						m_scene->getLight(k)->getIllumination(ray.pointAtParameter(hit.getT()), dir, col, disttolight);
 						finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
 					}
 				} else {
-					m_scene->getLight(k)->getIllumination(hit.getT()*ray.getDirection(), dir, col, disttolight);
 					finalColor += hit.getMaterial()->Shade(ray, hit, dir, col);
 				}
 
