@@ -44,7 +44,7 @@ public:
 		if (t < 0) t = max(t0, t1);
 		if (t < 0) return false;
 		if (t >= tmin && t < h.getT()){
-			h.set(t, this->material, (t*r.getDirection() + r.getOrigin() - this->center).normalized());
+			h.set(t, this->material, (r.pointAtParameter(t) - this->center).normalized());
 //			h.set((float)(t), this->material, h.getNormal());
 //			cout<<"INSERSECT a = "<<a<<" b = "<<b<<" c = "<<c<<" disc = "<<disc<<" t = "<<t<<endl;
 			return true;

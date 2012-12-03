@@ -10,13 +10,17 @@
 
 Vector3f mirrorDirection( const Vector3f& normal, const Vector3f& incoming)
 {
-	return incoming - 2*Material::pointwiseDot(incoming, normal) * normal;
+	return incoming - 2.0*Vector3f::dot(incoming, normal) * normal;
 }
 
 bool transmittedDirection( const Vector3f& normal, const Vector3f& incoming, 
         float index_n, float index_nt, 
         Vector3f& transmitted)
 {
+	float undersq = 1.0 - (index_n*index_n*(1.0 - (Vector3f::dot(incoming, normal) * Vector3f::dot(incoming, normal))))/(index_nt*index_nt);
+	if (undersq < 0) return false;
+	transmitted = index_n / index_nt *(incoming - normal*Vector3f::dot(incoming, normal)) - normal*sqrt(undersq);
+	return true;	
 }
 
 RayTracer::RayTracer( SceneParser * scene, int max_bounces, bool shadows) :
@@ -69,16 +73,20 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 
 			}
 			
-			//mirror reflection
-			if (bounces > 0 && hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
+			//reflection
+			if (bounces > 0)// && hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
 			{
 				Vector3f mirrorDir = mirrorDirection(hit.getNormal(), ray.getDirection());
 				Ray mirrorRay(hitPt, mirrorDir);
 				Hit h;
-				finalColor += traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h) * h.getMaterial()->getSpecularColor();
+				finalColor += traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h) * hit.getMaterial()->getSpecularColor();
 			}
 
-			//TODO: transparent
+			//refraction
+			if (hit.getMaterial()->getRefractionIndex() > 0){
+				
+			}					
+
 		} else {
 			finalColor = m_scene->getBackgroundColor(ray.getDirection());
 		}
