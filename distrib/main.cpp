@@ -97,10 +97,19 @@ int main( int argc, char* argv[] )
 		float step_x = 2.0f / float(size_x * 3);
 		float step_y = 2.0f / float(size_y * 3);
 
+		float r_i = (float)rand()/(float)RAND_MAX - 0.5;
+		float r_j = (float)rand()/(float)RAND_MAX - 0.5;		
+
 		Image final(size_x*3, size_y*3);
 		for (int i = 0; i < size_x*3; i++){
 			for (int j = 0; j < size_y*3; j++){
-				Ray r = parser->getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
+				float itogen = (float)(i + r_i) * step_x - 1.0f;
+				float jtogen = (float)(j + r_j) * step_y - 1.0f;
+				if (itogen > 1) itogen = 1.0;
+				if (jtogen > 1) jtogen = 1.0;
+				if (itogen < -1) itogen = -1.0;
+				if (jtogen < -1) jtogen = -1.0;
+				Ray r = parser->getCamera()->generateRay((Vector2f(itogen, jtogen)));
 				Hit h;
 				Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 1.0, h);  
 				final.SetPixel(i, j, color);
