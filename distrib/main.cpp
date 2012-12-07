@@ -25,6 +25,7 @@ int main( int argc, char* argv[] )
 	int max_bounces = 0;
 	bool shadows = false;
 	//double aspect = 0.0;	
+	bool jitter = false;
 
   // This loop loops over each of the input arguments.
   // argNum is initialized to 1 because the first
@@ -75,6 +76,8 @@ int main( int argc, char* argv[] )
 			}
 		} else if (strcmp(argv[argNum], "-shadows") == 0){
 			shadows = true;
+		} else if (strcmp(argv[argNum], "-jitter") == 0){
+			jitter = true;
 		}
     }
 	
@@ -87,42 +90,43 @@ int main( int argc, char* argv[] )
   // pixel in your output image.
 
 	SceneParser *parser = new SceneParser(filename);
-	Image final(size_x, size_y);
 	RayTracer raytracer(parser, max_bounces, shadows);
-	float step_x = 2.0f / float(size_x);
-	float step_y = 2.0f / float(size_y);
-	//TODO: add aspect ratio
+		//TODO: add aspect ratio
 	cout<<parser->getGroup()->getGroupSize()<<endl;
-	for (int i = 0; i < size_x; i++){
-		for (int j = 0; j < size_y; j++){
-			Ray r = parser->getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
-			//cout<<"ray = "<<r <<endl;	
-			Hit h;
-			Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 1.0, h);  
-//			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
-//			if (intersect){
-//				Vector3f dir;
-//				Vector3f col;
-//				Vector3f pixelval(0, 0, 0);
-//				for (int k = 0; k < parser.getNumLights(); k++){
-//					float disttolight = h.getT();
-//					parser.getLight(k)->getIllumination(h.getT()*r.getDirection(), dir, col, disttolight);
-//					pixelval += h.getMaterial()->Shade(r, h, dir, col);
-//				}
-//				if (h.getMaterial()->validTexture()) {
-//					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->returnTexture(h) + pixelval);
-//				} else {
-//					final.SetPixel(i, j, parser.getAmbientLight() * h.getMaterial()->getDiffuseColor() + pixelval);
-//				}
-//			} else {
-//				final.SetPixel(i, j, parser.getBackgroundColor(r.getDirection()));
-//			}
-			final.SetPixel(i, j, color);
-			
+	if (jitter){
+		float step_x = 2.0f / float(size_x * 3);
+		float step_y = 2.0f / float(size_y * 3);
+
+		Image final(size_x*3, size_y*3);
+		for (int i = 0; i < size_x*3; i++){
+			for (int j = 0; j < size_y*3; j++){
+				Ray r = parser->getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
+				Hit h;
+				Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 1.0, h);  
+				final.SetPixel(i, j, color);
+				
+			}
 		}
+
+		final.SaveImage(outputfilename);
+	} else {
+		float step_x = 2.0f / float(size_x);
+		float step_y = 2.0f / float(size_y);
+
+		Image final(size_x, size_y);
+		for (int i = 0; i < size_x; i++){
+			for (int j = 0; j < size_y; j++){
+				Ray r = parser->getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
+				Hit h;
+				Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 1.0, h);  
+				final.SetPixel(i, j, color);
+				
+			}
+		}
+
+		final.SaveImage(outputfilename);
 	}	
 
-	final.SaveImage(outputfilename);
   return 0;
 }
 
