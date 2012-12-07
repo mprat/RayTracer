@@ -116,7 +116,7 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 					Ray refractRay(hitPt, transmitted);
 					//refractContribution += traceRay(refractRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
 					//if ((r != 1) && !(r < 0)) cout<<"n = "<<n<<" n_t = "<<n_t<<" r_0 = "<<r_0<<" r = "<<r<<endl;
-					finalColor += (1.0 - r)*traceRay(refractRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
+					finalColor += (1.0 - r)*traceRay(refractRay, EPSILON, bounces - 1, n_t, h) * hit.getMaterial()->getSpecularColor();
 				}
 			}					
 		
