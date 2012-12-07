@@ -94,8 +94,8 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 				Hit h;
 				//reflectContribution += traceRay(mirrorRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
 				if (n_t + n == 0) r = pow(1.0 - c, 5);
-				if ((r != 1) && !(r < 0)) cout<<"n = "<<n<<" n_t = "<<n_t<<" r_0 = "<<r_0<<" r = "<<r<<endl;
-				finalColor += r*traceRay(mirrorRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
+				//if ((r != 1) && !(r < 0)) cout<<"n = "<<n<<" n_t = "<<n_t<<" r_0 = "<<r_0<<" r = "<<r<<endl;
+				finalColor += r*traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h) * hit.getMaterial()->getSpecularColor();
 			}
 
 			//refraction
