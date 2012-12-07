@@ -98,8 +98,7 @@ int main( int argc, char* argv[] )
 			Ray r = parser->getCamera()->generateRay((Vector2f((float)(i) * step_x - 1.0f, (float)(j) * step_y - 1.0f)));
 			//cout<<"ray = "<<r <<endl;	
 			Hit h;
-			//TODO: add in refractive index
-			Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 0, h);  
+			Vector3f color = raytracer.traceRay(r, parser->getCamera()->getTMin(), max_bounces, 1.0, h);  
 //			bool intersect = parser.getGroup()->intersect(r, h, parser.getCamera()->getTMin()); 
 //			if (intersect){
 //				Vector3f dir;

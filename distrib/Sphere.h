@@ -19,7 +19,10 @@ public:
 		this->center = center;
 		this->radius = radius;
 	}
-	
+
+	bool rayOriginInside(const Vector3f rayOrigin){
+		return ((this->center - rayOrigin).absSquared() <= this->radius);
+	}	
 
 	~Sphere(){}
 
@@ -31,6 +34,7 @@ public:
 //		cout<<"ALL a = "<<a<<" b = "<<b<<" c = "<<c<<" disc = "<<disc<<endl;
 		float t0 = 0, t1 = 0;
 		float t;
+		bool oneRootNegative = false;
 		if (disc < 0) return false;
 		else if (disc == 0){
 			t0 = t1 = -0.5 * b / a;
@@ -41,10 +45,17 @@ public:
 			//cout<<"t0 = "<<t0<<" t1 = "<<t1<<endl;
 		}
 		t = min(t0, t1);
-		if (t < 0) t = max(t0, t1);
-		if (t < 0) return false;
+		if (t < tmin) {
+			t = max(t0, t1);
+			oneRootNegative = true;
+		}
+		if (t < tmin) return false;
 		if (t >= tmin && t < h.getT()){
-			h.set(t, this->material, (r.pointAtParameter(t) - this->center).normalized());
+			if (oneRootNegative){	
+				h.set(t, this->material, -1.0*(r.pointAtParameter(t) - this->center).normalized());
+			} else {
+				h.set(t, this->material, (r.pointAtParameter(t) - this->center).normalized());	
+			}
 //			h.set((float)(t), this->material, h.getNormal());
 //			cout<<"INSERSECT a = "<<a<<" b = "<<b<<" c = "<<c<<" disc = "<<disc<<" t = "<<t<<endl;
 			return true;

@@ -74,18 +74,51 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 			}
 			
 			//reflection
-			if (bounces > 0)// && hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
+			Vector3f reflectContribution(0, 0, 0);
+			if (bounces > 0 && hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
 			{
 				Vector3f mirrorDir = mirrorDirection(hit.getNormal(), ray.getDirection());
 				Ray mirrorRay(hitPt, mirrorDir);
 				Hit h;
-				finalColor += traceRay(mirrorRay, EPSILON, bounces - 1, refr_index, h) * hit.getMaterial()->getSpecularColor();
+				reflectContribution += traceRay(mirrorRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
 			}
 
 			//refraction
-			if (hit.getMaterial()->getRefractionIndex() > 0){
-				
+			Vector3f refractContribution(0, 0, 0);
+			float r_0 = 0;
+			float r = 1.0;
+			float c = 0;
+			if (bounces > 0 && hit.getMaterial()->getRefractionIndex() > 0){
+				Vector3f transmitted;
+				float n, n_t;
+				//if (Vector3f::dot(ray.getDirection(), hit.getNormal()) > 0){
+				//	n_t = refr_index;
+				//	n = hit.getMaterial()->getRefractionIndex();
+				//} else {
+					n = refr_index;
+					n_t = hit.getMaterial()->getRefractionIndex();
+				//}
+//				cout<< "n =  "<<n<<" n_t = "<<n_t<<endl;
+				if (n == hit.getMaterial()->getRefractionIndex()){
+					n_t = 1.0;
+				}
+				if (transmittedDirection(hit.getNormal(), ray.getDirection(), n, n_t, transmitted)){
+					Hit h;
+					Ray refractRay(hitPt, transmitted);
+					refractContribution += traceRay(refractRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
+					r_0 = (n_t - n)/(n_t + n);
+					r_0 *= r_0;
+					if (n <= n_t){
+						c = abs(Vector3f::dot(ray.getDirection(), hit.getNormal()));
+					} else {
+						c = abs(Vector3f::dot(transmitted, hit.getNormal()));
+					}
+					r = r_0 + (1.0 - r_0)*pow(1.0 - c, 5);
+				}
 			}					
+		
+			finalColor += r*reflectContribution;
+			finalColor += (1.0 - r) * refractContribution;
 
 		} else {
 			finalColor = m_scene->getBackgroundColor(ray.getDirection());
