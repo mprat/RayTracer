@@ -26,6 +26,7 @@ int main( int argc, char* argv[] )
 	bool shadows = false;
 	//double aspect = 0.0;	
 	bool jitter = false;
+	bool filter = false;
 
   // This loop loops over each of the input arguments.
   // argNum is initialized to 1 because the first
@@ -78,6 +79,8 @@ int main( int argc, char* argv[] )
 			shadows = true;
 		} else if (strcmp(argv[argNum], "-jitter") == 0){
 			jitter = true;
+		} else if (strcmp(argv[argNum], "-filter") == 0){
+			filter = true;
 		}
     }
 	
@@ -117,7 +120,57 @@ int main( int argc, char* argv[] )
 			}
 		}
 
-		final.SaveImage(outputfilename);
+		
+		if (filter){
+			Image finalfilter(size_x * 3, size_y *3);
+			float k0 = .1201;
+			float k1 = .2339;
+			float k2 = .2931;
+			float k3 = .2339;
+			float k4 = .1201;
+			Vector3f colorpix(0, 0, 0);
+			//horizontal blur
+			for (int i = 0; i < size_x*3; i++){
+				for (int j = 0; j < size_y * 3; j++){
+					colorpix = k0*final.GetPixel(i, max(j - 2, 0)) + k1*final.GetPixel(i, max(j - 1, 0)) + k2*final.GetPixel(i, j) + k3*final.GetPixel(i, min(j+1, final.Width() - 1)) + k4*final.GetPixel(i, min(j+2, final.Width() - 1));
+					finalfilter.SetPixel(i, j, colorpix);
+				}
+			}
+
+			colorpix = Vector3f(0, 0, 0);
+			//vertical blur
+			Image finalAfterVert(size_x*3, size_y*3);
+			for (int i = 0; i < size_x*3; i++){
+				for (int j = 0; j < size_y*3; j++){
+					colorpix = k0*finalfilter.GetPixel(max(i - 2, 0), j) + k1*finalfilter.GetPixel(max(i - 1, 0), j) + k2*finalfilter.GetPixel(i, j) + k3*finalfilter.GetPixel(min(i+1, finalfilter.Height() - 1), j) + k4*finalfilter.GetPixel(min(i+2, finalfilter.Height() - 1), j);
+					finalAfterVert.SetPixel(i, j, colorpix);
+				}
+			}
+
+			//downsample
+			Image finalOrig(size_x, size_y);
+			Vector3f downColor(0, 0, 0);
+			for (int i = 0; i < size_x; i++){
+				for (int j = 0; j < size_y; j++){
+					//cout<<"i = "<<i<<" j = "<<j<<endl;
+					//cout<<"1 = "<<finalAfterVert.GetPixel(max(3*i - 1, 0), max(3*j - 1, 0))<<endl;
+					//cout<<"2 = "<<finalAfterVert.GetPixel(3*i, max(3*j - 1, 0))<<endl;
+					//cout<<"3 = "<<finalAfterVert.GetPixel(min(3*i + 1, finalAfterVert.Height() - 1), max(3*j - 1, 0))<<endl;
+					//cout<<"4 = "<<finalAfterVert.GetPixel(max(3*i - 1, 0), 3*j)<<endl;
+					//cout<<"5 = "<<finalAfterVert.GetPixel(3*i, 3*j)<<endl;
+					//cout<<"6 = "<<finalAfterVert.GetPixel(min(3*i + 1, finalAfterVert.Height() - 1), 3*j)<<endl;
+					//cout<<"7 = "<<finalAfterVert.GetPixel(max(3*i - 1, 0), min(3*j + 1, finalAfterVert.Width() - 1))<<endl;
+					//cout<<"8 = "<<finalAfterVert.GetPixel(3*i, max(3*j + 1, finalAfterVert.Width() - 1))<<endl;
+					//cout<<"9 = "<<finalAfterVert.GetPixel(max(3*i + 1, finalAfterVert.Height() - 1), max(3*j + 1, finalAfterVert.Height() - 1))<<endl;
+					downColor = (finalAfterVert.GetPixel(max(3*i - 1, 0), max(3*j - 1, 0)) + finalAfterVert.GetPixel(3*i, max(3*j - 1, 0)) + finalAfterVert.GetPixel(min(3*i + 1, finalAfterVert.Height() - 1), max(3*j - 1, 0)) + finalAfterVert.GetPixel(max(3*i - 1, 0), 3*j) + finalAfterVert.GetPixel(3*i, 3*j) + finalAfterVert.GetPixel(min(3*i + 1, finalAfterVert.Height() - 1), 3*j) + finalAfterVert.GetPixel(max(3*i - 1, 0), min(3*j + 1, finalAfterVert.Width() - 1)) + finalAfterVert.GetPixel(3*i, min(3*j + 1, finalAfterVert.Width() - 1)) + finalAfterVert.GetPixel(min(3*i + 1, finalAfterVert.Height() - 1), min(3*j + 1, finalAfterVert.Height() - 1)))/9;
+					finalOrig.SetPixel(i, j, downColor);
+				}
+			}	
+
+			finalOrig.SaveImage(outputfilename);
+		} else {
+			final.SaveImage(outputfilename);
+		}
 	} else {
 		float step_x = 2.0f / float(size_x);
 		float step_y = 2.0f / float(size_y);
