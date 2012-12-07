@@ -20,6 +20,7 @@ bool transmittedDirection( const Vector3f& normal, const Vector3f& incoming,
 	float undersq = 1.0 - (index_n*index_n*(1.0 - (Vector3f::dot(incoming, normal) * Vector3f::dot(incoming, normal))))/(index_nt*index_nt);
 	if (undersq < 0) return false;
 	transmitted = index_n / index_nt *(incoming - normal*Vector3f::dot(incoming, normal)) - normal*sqrt(undersq);
+	transmitted = transmitted.normalized();
 	return true;	
 }
 
@@ -72,7 +73,18 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 				}
 
 			}
-			
+		
+			//Fresnel
+			float n = refr_index;
+			float n_t = hit.getMaterial()->getRefractionIndex();
+			float r_0 = 0;
+			float r = 1.0;
+			float c = 0;
+			r_0 = pow((n_t - n)/(n_t + n), 2);
+			//if (n_t + n == 0) r_0 = 1;
+			c = abs(Vector3f::dot(ray.getDirection(), hit.getNormal()));
+			r = r_0 + (1.0 - r_0)*pow(1.0 - c, 5);			
+
 			//reflection
 			Vector3f reflectContribution(0, 0, 0);
 			if (bounces > 0 && hit.getMaterial()->getSpecularColor() != Vector3f(0, 0, 0))
@@ -80,45 +92,36 @@ Vector3f RayTracer::traceRay( Ray& ray, float tmin, int bounces,
 				Vector3f mirrorDir = mirrorDirection(hit.getNormal(), ray.getDirection());
 				Ray mirrorRay(hitPt, mirrorDir);
 				Hit h;
-				reflectContribution += traceRay(mirrorRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
+				//reflectContribution += traceRay(mirrorRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
+				if (n_t + n == 0) r = pow(1.0 - c, 5);
+				if ((r != 1) && !(r < 0)) cout<<"n = "<<n<<" n_t = "<<n_t<<" r_0 = "<<r_0<<" r = "<<r<<endl;
+				finalColor += r*traceRay(mirrorRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
 			}
 
 			//refraction
 			Vector3f refractContribution(0, 0, 0);
-			float r_0 = 0;
-			float r = 1.0;
-			float c = 0;
 			if (bounces > 0 && hit.getMaterial()->getRefractionIndex() > 0){
 				Vector3f transmitted;
-				float n, n_t;
-				//if (Vector3f::dot(ray.getDirection(), hit.getNormal()) > 0){
-				//	n_t = refr_index;
-				//	n = hit.getMaterial()->getRefractionIndex();
-				//} else {
-					n = refr_index;
-					n_t = hit.getMaterial()->getRefractionIndex();
-				//}
-//				cout<< "n =  "<<n<<" n_t = "<<n_t<<endl;
+				if (n > n_t){
+					c = abs(Vector3f::dot(transmitted, hit.getNormal()));
+					r = r_0 + (1.0 - r_0)*pow(1.0 - c, 5);
+				}
 				if (n == hit.getMaterial()->getRefractionIndex()){
 					n_t = 1.0;
+					r_0 = pow((n_t - n)/(n_t + n), 2);
+					r = r_0 + (1.0 - r_0)*pow(1.0 - c, 5);			
 				}
 				if (transmittedDirection(hit.getNormal(), ray.getDirection(), n, n_t, transmitted)){
 					Hit h;
 					Ray refractRay(hitPt, transmitted);
-					refractContribution += traceRay(refractRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
-					r_0 = (n_t - n)/(n_t + n);
-					r_0 *= r_0;
-					if (n <= n_t){
-						c = abs(Vector3f::dot(ray.getDirection(), hit.getNormal()));
-					} else {
-						c = abs(Vector3f::dot(transmitted, hit.getNormal()));
-					}
-					r = r_0 + (1.0 - r_0)*pow(1.0 - c, 5);
+					//refractContribution += traceRay(refractRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
+					//if ((r != 1) && !(r < 0)) cout<<"n = "<<n<<" n_t = "<<n_t<<" r_0 = "<<r_0<<" r = "<<r<<endl;
+					finalColor += (1.0 - r)*traceRay(refractRay, EPSILON, bounces - 1, hit.getMaterial()->getRefractionIndex(), h) * hit.getMaterial()->getSpecularColor();
 				}
 			}					
 		
-			finalColor += r*reflectContribution;
-			finalColor += (1.0 - r) * refractContribution;
+//			finalColor += r*reflectContribution;
+//			finalColor += (1.0 - r) * refractContribution;
 
 		} else {
 			finalColor = m_scene->getBackgroundColor(ray.getDirection());
